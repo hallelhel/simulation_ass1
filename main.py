@@ -2,285 +2,41 @@
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import math
-import random
+
 import numpy as np
-import sys
+import pandas as pd
+from scipy import stats
+import RNS_ASS
 
-global distribution_dict_values
-distribution_dict_values = {'MC': [], 'MMR': [], 'GPS ANT': [], 'LOC ANT Swi': [],
-                            'GS ANT': [], 'LOC ANT': [], 'RA': [], 'RA ANT': [], 'NAV-4000': [],
-                            'VOR ANT': [], 'MB ANT': [], 'ADF ANT': [], 'DME INT': [], 'ANT-42': []}
-global n
-component_distribution_dict = {
-    'MC': {
-        "name": "exponential",
-        # "distribution":,
-        "lambada": 1/12000,
-        "mu": None,
-        "sigma": None,
-        "beta": None,
-        "eta": None
-        },
-    'MMR': {
-        "name": "exponential",
-        # "distribution":,
-        "lambada": 1/26000,
-        "mu": None,
-        "sigma": None,
-        "beta": None,
-        "eta": None
-    },
-    'GPS ANT': {
-        "name": "weibull",
-        # "distribution": weibull_distribution,
-        "lambada": None,
-        "mu": None,
-        "sigma": None,
-        "beta": 0.98,
-        "eta": 26213
-    },
-    'LOC ANT Swi': {
-        "name": "log_normal",
-        # "distribution": gumbel_distribution,
-        "lambada": None,
-        "mu": 9.86,
-        "sigma": 1.31,
-        "beta": None,
-        "eta": None
-    },
-    'GS ANT': {
-        "name": "weibull",
-        "lambada": None,
-        "mu": None,
-        "sigma": None,
-        "beta": 1.01,
-        "eta": 25326
-    },
-    'LOC ANT': {
-        "name": "weibull",
-        "lambada": None,
-        "mu": None,
-        "sigma": None,
-        "beta": 0.86,
-        "eta": 31636
-    },
-    'RA': {
-        "name": "exponential",
-        # "distribution":,
-        "lambada": 1/80000,
-        "mu": None,
-        "sigma": None,
-        "beta": None,
-        "eta": None
-    },
-    'RA ANT': {
-        "name": "weibull",
-        "lambada": None,
-        "mu": None,
-        "sigma": None,
-        "beta": 1.23,
-        "eta": 35380
-    },
-    'NAV-4000': {
-        "name": "exponential",
-        # "distribution":,
-        "lambada": 1/20000,
-        "mu": None,
-        "sigma": None,
-        "beta": None,
-        "eta": None
-    },
-    'VOR ANT': {
-        "name": "weibull",
-        "lambada": None,
-        "mu": None,
-        "sigma": None,
-        "beta": 1.15,
-        "eta": 28263
-    },
-    'MB ANT': {
-        "name": "weibull",
-        "lambada": None,
-        "mu": None,
-        "sigma": None,
-        "beta": 0.92,
-        "eta": 24926
-    },
-    'ADF ANT': {
-        "name": "weibull",
-        "lambada": None,
-        "mu": None,
-        "sigma": None,
-        "beta": 0.99,
-        "eta": 21042
-    },
-    'DME INT': {
-        "name": "exponential",
-        # "distribution":,
-        "lambada": 1 / 50000,
-        "mu": None,
-        "sigma": None,
-        "beta": None,
-        "eta": None
-    },
-    'ANT-42': {
-        "name": "weibull",
-        "lambada": None,
-        "mu": None,
-        "sigma": None,
-        "beta": 0.88,
-        "eta": 51656
-    }
-}
-
-'''
-    this func create a seed
-'''
-def set_seed():
-    seed_value = random.randrange(sys.maxsize)
-    return seed_value
-
-'''
-uniform distribution
-'''
-def uniform_dis(seed_value):
-    random.seed(seed_value)
-    num = np.random.uniform(0, 1, None)
-    return num
-''' 
-    exponential
-'''
-def exp_dis(uniform_values,lambada):
-    nums = []
-    for i in range(len(uniform_values)-1):
-        nums.append(-math.log(uniform_values[i], math.e) / lambada)
-    return nums
-
-''' 
-    weibull
-'''
-def weibull_dis(uniform_values, beta, eta): #eta=k?
-    nums = []
-    for i in range(len(uniform_values)-1):
-        nums.append(eta * (math.pow(-math.log(uniform_values[i], math.e), 1 / beta)))
-    return nums
-
-def log_normal_dis(uniform_values,sigma,mu):
-    nums = []
-    for i in range(len(uniform_values)-1):
-        nums.append(((math.sqrt(-2*math.log(uniform_values[i], math.e)))*math.sin(2*math.pi*uniform_values[i+1])*sigma)+mu)
-    return nums
-
-def create_random_array_by_uniform_dist(n):
-
-    uniform_values = []
-    for i in range(n):
-            # uniform_value = uniform_dis(seed_value)
-            uniform_value = uniform_dis(0.5)
-            uniform_values.append(uniform_value)
-    return uniform_values
-'''
-    create array of numbers for every sub system -
-    this array choose min value between systems
-'''
-def compare_estimate():
-    for sub_sys in sub_sys_values.keys():
-        eval(sub_sys + "()")
-
-def MC():
-    MC = randoms_array_for_sys(['MC'])
-    return MC
-
-def MMR():
-    MMR1 = randoms_array_for_sys(['MMR','GPS ANT','LOC ANT Swi'])
-    MMR1 = create_min_array(MMR1)
-    MMR2 = randoms_array_for_sys(['MMR','GPS ANT','LOC ANT Swi'])
-    MMR3= randoms_array_for_sys(['GS ANT', 'LOC ANT'])
-
-
-'''
-    create randoms arrays
-    get: list of numbers for systems 
-    return one list of random values with minimum for every index
-'''
-def randoms_array_for_sys(list):
-    n = 500
-    for sys in list:
-
-        print(sys)
-        uniform_values = create_random_array_by_uniform_dist(n + 1)
-        if component_distribution_dict[sys]["name"] == "exponential":
-            lambada = component_distribution_dict[sys]["lambada"]
-            values = exp_dis(uniform_values, lambada)
-
-
-        elif component_distribution_dict[sys]["name"] == "weibull":
-            beta = component_distribution_dict[sys]["beta"]
-            eta = component_distribution_dict[sys]["eta"]
-            values = weibull_dis(uniform_values,beta,eta)
-
-
-        elif component_distribution_dict[sys]["name"] == "log_normal":
-            mu = component_distribution_dict[sys]["mu"]
-            sigma = component_distribution_dict[sys]["sigma"]
-            values = log_normal_dis(uniform_values,sigma,mu)
-
-
-        distribution_dict_values[sys]=values
-    return distribution_dict_values
-
-
-
-'''
-    choose min value between arrays
-'''
-# def create_min_array(dict_of_sys_values):
-#     min_array = []
-#     for i in range(n):
-
-
-
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    seed_value = set_seed()
 
-    # distribution_dict_values = {'MC': [], 'MMR': [], 'GPS ANT': [], 'LOC ANT Swi': [],
-    # 'GS ANT': [], 'LOC ANT': [], 'RA': [], 'RA ANT':[], 'NAV-4000': [],
-    # 'VOR ANT': [], 'MB ANT': [], 'ADF ANT': [], 'DME INT': [], 'ANT-42': []}
+    ###############1A###################
 
-    sub_sys_values = {'MC': ['MC'], 'MMR': ['MMR','GPS ANT','LOC ANT Swi', 'GS ANT', 'LOC ANT'], 'RA': ['RA', 'RA ANT'],
-                      'VHF-NAV': ['NAV-4000', 'VOR ANT', 'MB ANT','ADF ANT'], 'DME': ['DME INT', 'ANT-42']}
+    ## set seed
+    rns = RNS_ASS.RNS_system()
+    seed_value = rns.set_seed()
 
-    n = 500
+    ## lottery uniform 1 number
+    uniform_number = rns.uniform_dis(seed_value)
 
-    for distribution in component_distribution_dict.keys():
+    ## lottery list of uniform numbers
+    uniform_numbers = rns.create_random_array_by_uniform_dist()
 
-        print(distribution)
-        uniform_values = create_random_array_by_uniform_dist(n + 1)
-        if component_distribution_dict[distribution]["name"] == "exponential":
-            lambada = component_distribution_dict[distribution]["lambada"]
-            values = exp_dis(uniform_values, lambada)
+    ## lottery for every distribution depend on parameters
+        ## lottery expotitonal number using uniform number
+        ## lottery weibull number using uniform number
+        ## lottery lognormal number using uniform number
 
+    ###############1B###################
+    # set seed to 0.5 and lottery 500 numbers for every 14 dist
+    rns.seed = 0.5
+    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+                            'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
+                            'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
 
-        elif component_distribution_dict[distribution]["name"] == "weibull":
-            beta = component_distribution_dict[distribution]["beta"]
-            eta = component_distribution_dict[distribution]["eta"]
-            values = weibull_dis(uniform_values,beta,eta)
-
-
-        elif component_distribution_dict[distribution]["name"] == "log_normal":
-            mu = component_distribution_dict[distribution]["mu"]
-            sigma = component_distribution_dict[distribution]["sigma"]
-            values = log_normal_dis(uniform_values,sigma,mu)
-
-
-        distribution_dict_values[distribution]=values
-
+    ## check estimators - only for us:
     all_sys = {}
-    median_dict={}
+    median_dict = {}
     for distribution in distribution_dict_values:
         median = np.median(distribution_dict_values[distribution])
         median_dict[distribution] = median
@@ -288,8 +44,64 @@ if __name__ == '__main__':
         num = len(distribution_dict_values[distribution])
         all_sys[distribution] = (sum_dis) / (num)
 
-    compare_estimate()
+    ### estimators to compare with table 3
+    sub_sys_expectation1 = rns.compare_estimate()
 
+    ###############1C###################
+    # (1) lottery again 500 with seed=0.5
+    rns.seed = 0.5
+    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+                                                          'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
+                                                          'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
+    sub_sys_expectation2 = rns.compare_estimate()
+    # (2) lottery again 500 with seed=othee value
+
+    rns.seed = 0.4
+    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+                                                          'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
+                                                          'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
+    sub_sys_expectation3 = rns.compare_estimate()
+
+    # (3) lottery again now 10,000 with diff seed
+    rns.seed = rns.set_seed()
+    rns.n = 10000
+    rns.len_of_uniform_array = 10001
+    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+                                                          'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
+                                                          'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
+    sub_sys_expectation4 = rns.compare_estimate()
+
+    ###############1D###################
+
+    # 100 lottery every lottery diff seed
+    rns.n = 500
+    rns.len_of_uniform_array = 501
+    expectation_100 = pd.DataFrame(columns=['MC', 'MMR', 'RA', 'VHF_NAV', 'DME', 'RNS'])
+    number_of_trials = 100
+    for i in range(number_of_trials):
+        rns.seed = rns.set_seed()
+        distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+                                                              'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
+                                                             'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
+        curr_values = rns.compare_estimate()
+        expectation_100.loc[len(expectation_100)] = list(curr_values.values())
+
+    #  Confidence interval 90%
+    bottom_decile = pd.DataFrame(columns=expectation_100.keys())
+    top_decile = pd.DataFrame(columns=expectation_100.keys())
+    for system in expectation_100.keys():
+        expectation_100[system] = sorted(expectation_100[system])
+        bottom_decile[system] = expectation_100[system].loc[0: 0.1 * number_of_trials - 1]
+        top_decile[system] = expectation_100[system].loc[0.9 * number_of_trials: number_of_trials]
+
+    merged_deciles = pd.concat([bottom_decile, top_decile])
+    # (1) Confidence interval by Empirical experiments
+    confidence_interval_empirical = stats.t.interval(0.9, len(merged_deciles) - 1, loc=np.mean(merged_deciles), scale= stats.sem(merged_deciles))
+
+    # (2) Confidence interval by normal distribution
+    confidence_interval_normal = stats.t.interval(0.9, len(expectation_100) - 1, loc=np.mean(expectation_100), scale= stats.sem(expectation_100))
+
+    ###############1E###################
 
 
 
