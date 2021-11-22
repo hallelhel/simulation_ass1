@@ -2,6 +2,8 @@ import math
 import random
 import numpy as np
 import sys
+# import tensorflow_probability as tfp
+
 
 
 class RNS_system:
@@ -222,9 +224,13 @@ class RNS_system:
     def log_normal_dis(self,uniform_values, sigma, mu):
         nums = []
         for i in range(len(uniform_values) - 1):
-            uni_to_normal = -2 * math.log(uniform_values[i], math.e) * math.cos(2 * math.pi * uniform_values[i + 1])
-            normal_to_lognormal = math.exp(uni_to_normal)
+            uni_to_normal = math.sqrt(-2 * math.log(uniform_values[i], math.e)) * math.cos(2 * math.pi * uniform_values[i + 1])
+            # normal_to_lognormal = math.exp(uni_to_normal)
+            result = uni_to_normal * sigma + mu
+            normal_to_lognormal = math.exp(result)
             nums.append(normal_to_lognormal)
+            # log_normal= np.random.lognormal(mu, sigma, 1000)
+            # nums.append(log_normal)
             # nums.append(((math.sqrt(-2 * math.log(uniform_values[i], math.e))) * math.sin(
             #     2 * math.pi * uniform_values[i + 1]) * sigma) + mu)
         return nums
@@ -354,3 +360,23 @@ class RNS_system:
         DME_final = np.maximum(DME1, DME2)
 
         return list(DME_final)
+
+
+    '''
+        Calculates halton function
+    '''
+    def Halton_function(self, count_of_number):
+        # engine = qmc.Halton(d=2, seed=self.set_seed())
+        # sample["Halton"] = engine.random(n_sample)
+        list_of_uniform = []
+        # for i in range(count_of_number):
+        #     list_of_uniform.append(np.random.uniform(0, 1, None))
+        # Xi = list_of_uniform.sample(count_of_number * 2, rule='halton')
+
+        # tfp.mcmc.sample_halton_sequence(
+        #     dim, num_results=None, sequence_indices=None, dtype=tf.float32, randomized=True,
+        #     seed=None, name=None
+        # )
+        # result_df = generate_dataframe(sample_size, Xi)
+        # print_result_values(result_df)
+        print("a")
