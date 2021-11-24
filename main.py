@@ -6,7 +6,10 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
+# from scipy.stats import qmc
 import RNS_ASS
+from statsmodels.tools import sequences
+
 
 if __name__ == '__main__':
 
@@ -50,6 +53,7 @@ if __name__ == '__main__':
     ###############1C###################
     # (1) lottery again 500 with seed=0.5
     rns.seed = 0.5
+
     distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
                                                           'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
@@ -57,6 +61,7 @@ if __name__ == '__main__':
     # (2) lottery again 500 with seed=othee value
 
     rns.seed = 0.4
+
     distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
                                                           'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
@@ -66,6 +71,7 @@ if __name__ == '__main__':
     rns.seed = rns.set_seed()
     rns.n = 10000
     rns.len_of_uniform_array = 10001
+
     distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
                                                           'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
@@ -101,9 +107,45 @@ if __name__ == '__main__':
     # (2) Confidence interval by normal distribution
     confidence_interval_normal = stats.t.interval(0.9, len(expectation_100) - 1, loc=np.mean(expectation_100), scale= stats.sem(expectation_100))
 
+
+
+
     ###############1E###################
+    ######## halton 50 #########
+    halton_values = sequences.halton(dim=2, n_sample=50)
+    halton_values_list = [val[0] for val in halton_values]
+    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+                                                          'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
+                                                          'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'],
+                                                       halton_values_list)
+    exp_50 = {}
+    for sys in distribution_dict_values.keys():
+        exp_50[sys] = rns.calculate_expectation(distribution_dict_values[sys])
 
 
+    ######## halton 200 #########
+    halton_values = sequences.halton(dim=1, n_sample=200)
+    halton_values_list = [val[0] for val in halton_values]
+    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+                                                          'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
+                                                          'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'],
+                                                         halton_values_list)
+    exp_200 = {}
+    for sys in distribution_dict_values.keys():
+        exp_200[sys] = rns.calculate_expectation(distribution_dict_values[sys])
+
+    ######## halton 500 #########
+    halton_values = sequences.halton(dim=1, n_sample=500)
+    halton_values_list = [val[0] for val in halton_values]
+    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+                                                          'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
+                                                          'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'],
+                                                         halton_values_list)
+    exp_500 = {}
+    for sys in distribution_dict_values.keys():
+        exp_500[sys] = rns.calculate_expectation(distribution_dict_values[sys])
+
+    ###############2A###################
 
 
 
