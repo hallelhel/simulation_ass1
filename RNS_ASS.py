@@ -445,3 +445,46 @@ class RNS_system:
         _ = plt.hist(array, bins='auto')  # arguments are passed to np.histogram
         plt.title("Histogram-"+sys+" "+dist)
         plt.show()
+
+    '''
+        create randoms arrays
+        get: list of numbers for systems 
+        return one list of random values 
+    '''
+
+    def randoms_array_for_sys_halton(self, list_of_distrubition,array_halton):
+        sys_dict_values = {}
+        for system in list_of_distrubition:
+            # uniform_values = self.create_random_array_by_uniform_dist()
+            if self.component_distribution_dict[system]["name"] == "exponential":
+                lambada = self.component_distribution_dict[system]["lambada"]
+                values = self.exp_dis(array_halton, lambada)
+                # self.histograms(values, system, "expo")
+                # estimate parameters
+                esti_lambada = self.fitexp(values)
+                self.esti_parameters[system] = esti_lambada
+
+
+            elif self.component_distribution_dict[system]["name"] == "weibull":
+                beta = self.component_distribution_dict[system]["beta"]
+                eta = self.component_distribution_dict[system]["eta"]
+                values = self.weibull_dis(array_halton, beta, eta)
+                # self.histograms(values, system, "weibull")
+                # estimate parameters
+                esti_beta, esti_eta = self.fitweibull(values)
+                self.esti_parameters[system] = esti_beta, esti_eta
+
+
+
+            elif self.component_distribution_dict[system]["name"] == "log_normal":
+                mu = self.component_distribution_dict[system]["mu"]
+                sigma = self.component_distribution_dict[system]["sigma"]
+                values = self.log_normal_dis(array_halton, sigma, mu)
+                # self.histograms(values,system,"lognormal")
+                #estimate parameters
+                esti_mu, esti_sigma = self.fitlognormal(values)
+                self.esti_parameters[system] = esti_mu, esti_sigma
+
+
+            sys_dict_values[system] = values
+        return sys_dict_values
