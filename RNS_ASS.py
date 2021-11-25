@@ -1,7 +1,11 @@
 import math
 import random
-import numpy as np
 import sys
+from scipy.stats import exponweib
+from scipy.optimize import fmin
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
 # import tensorflow_probability as tfp
 
 
@@ -139,6 +143,9 @@ class RNS_system:
         }
         self.len_of_uniform_array = 501
         self.seed = 0.5
+        self.esti_parameters = {'MC': [], 'MMR': [], 'GPS ANT': [], 'LOC ANT Swi': [],
+                                    'GS ANT': [], 'LOC ANT': [], 'RA': [], 'RA ANT': [], 'NAV-4000': [],
+                                    'VOR ANT': [], 'MB ANT': [], 'ADF ANT': [], 'DME INT': [], 'ANT-42': []}
 
     '''
         set seed
@@ -162,18 +169,32 @@ class RNS_system:
             if self.component_distribution_dict[system]["name"] == "exponential":
                 lambada = self.component_distribution_dict[system]["lambada"]
                 values = self.exp_dis(uniform_values, lambada)
+                self.histograms(values, system, "expo")
+                # estimate parameters
+                esti_lambada = self.fitexp(values)
+                self.esti_parameters[system] = esti_lambada
 
 
             elif self.component_distribution_dict[system]["name"] == "weibull":
                 beta = self.component_distribution_dict[system]["beta"]
                 eta = self.component_distribution_dict[system]["eta"]
                 values = self.weibull_dis(uniform_values, beta, eta)
+                self.histograms(values, system, "weibull")
+                # estimate parameters
+                esti_beta, esti_eta = self.fitweibull(values)
+                self.esti_parameters[system] = esti_beta, esti_eta
+
 
 
             elif self.component_distribution_dict[system]["name"] == "log_normal":
                 mu = self.component_distribution_dict[system]["mu"]
                 sigma = self.component_distribution_dict[system]["sigma"]
                 values = self.log_normal_dis(uniform_values, sigma, mu)
+                self.histograms(values,system,"lognormal")
+                #estimate parameters
+                esti_mu, esti_sigma = self.fitlognormal(values)
+                self.esti_parameters[system] = esti_mu, esti_sigma
+
 
             sys_dict_values[system] = values
         return sys_dict_values
@@ -225,14 +246,9 @@ class RNS_system:
         nums = []
         for i in range(len(uniform_values) - 1):
             uni_to_normal = math.sqrt(-2 * math.log(uniform_values[i], math.e)) * math.cos(2 * math.pi * uniform_values[i + 1])
-            # normal_to_lognormal = math.exp(uni_to_normal)
             result = uni_to_normal * sigma + mu
             normal_to_lognormal = math.exp(result)
             nums.append(normal_to_lognormal)
-            # log_normal= np.random.lognormal(mu, sigma, 1000)
-            # nums.append(log_normal)
-            # nums.append(((math.sqrt(-2 * math.log(uniform_values[i], math.e))) * math.sin(
-            #     2 * math.pi * uniform_values[i + 1]) * sigma) + mu)
         return nums
 
     def compare_estimate(self):
@@ -363,6 +379,46 @@ class RNS_system:
 
 
     '''
+    estimate weibull parameters
+    # array_of_values is data array
+    # returns [shape, scale]
+    '''
+    def fitweibull(self, array_of_values):
+        def optfun(theta):
+            return -np.sum(np.log(exponweib.pdf(array_of_values, 1, theta[0], scale=theta[1], loc=0)))
+
+        logx = np.log(array_of_values)
+        shape = 1.2 / np.std(logx)
+        scale = np.exp(np.mean(logx) + (0.572 / shape))
+        return fmin(optfun, [shape, scale], xtol=0.01, ftol=0.01, disp=0)
+
+    '''
+        estimate lognormal parameters
+        # array_of_values is data array
+        # returns [mu, sigma]
+        '''
+    def fitlognormal(self, array_of_values):
+        # fit data
+        sigma, loc, scale = stats.lognorm.fit(array_of_values, floc=0)
+
+        # get mu
+        mu = np.log(scale)
+        return mu, sigma
+
+    '''
+            estimate exp parameters
+            # array_of_values is data array
+            # returns lambada
+            '''
+
+    def fitexp(self, array_of_values):
+        # fit data
+        sum_dis = np.sum(array_of_values)
+        num = len(array_of_values)
+        esti_lambada = (sum_dis) / (num)
+        return esti_lambada
+
+    '''
         Calculates halton function
     '''
     def Halton_function(self, count_of_number):
@@ -380,3 +436,12 @@ class RNS_system:
         # result_df = generate_dataframe(sample_size, Xi)
         # print_result_values(result_df)
         print("a")
+
+
+    def histograms(self,array,sys,dist):
+        # rng = np.random.RandomState(10)  # deterministic random data
+        # a = np.hstack((rng.normal(size=1000),
+        #                rng.normal(loc=5, scale=2, size=1000)))
+        _ = plt.hist(array, bins='auto')  # arguments are passed to np.histogram
+        plt.title("Histogram-"+sys+" "+dist)
+        plt.show()

@@ -37,15 +37,20 @@ if __name__ == '__main__':
                             'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                             'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
 
-    ## check estimators - only for us:
-    all_sys = {}
-    median_dict = {}
-    for distribution in distribution_dict_values:
-        median = np.median(distribution_dict_values[distribution])
-        median_dict[distribution] = median
-        sum_dis = np.sum(distribution_dict_values[distribution])
-        num = len(distribution_dict_values[distribution])
-        all_sys[distribution] = (sum_dis) / (num)
+    distribution_estimates = rns.esti_parameters
+    ## estimate parameters:
+    # all_sys = {}
+    # median_dict = {}
+    # weibull_dict={}
+    # for distribution in distribution_dict_values:
+        # median = np.median(distribution_dict_values[distribution])
+        # median_dict[distribution] = median
+        # sum_dis = np.sum(distribution_dict_values[distribution])
+        # num = len(distribution_dict_values[distribution])
+        # all_sys[distribution] = (sum_dis) / (num)
+
+
+
 
     ### estimators to compare with table 3
     sub_sys_expectation1 = rns.compare_estimate()
@@ -57,16 +62,17 @@ if __name__ == '__main__':
     distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
                                                           'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
-    sub_sys_expectation2 = rns.compare_estimate()
+    # sub_sys_expectation2 = rns.compare_estimate()
+    distribution_estimates = rns.esti_parameters
     # (2) lottery again 500 with seed=othee value
 
-    rns.seed = 0.4
+    rns.seed = 2
 
     distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
                                                           'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
-    sub_sys_expectation3 = rns.compare_estimate()
-
+    # sub_sys_expectation3 = rns.compare_estimate()
+    distribution_estimates = rns.esti_parameters
     # (3) lottery again now 10,000 with diff seed
     rns.seed = rns.set_seed()
     rns.n = 10000
@@ -75,8 +81,8 @@ if __name__ == '__main__':
     distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
                                                           'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
-    sub_sys_expectation4 = rns.compare_estimate()
-
+    # sub_sys_expectation4 = rns.compare_estimate()
+    distribution_estimates = rns.esti_parameters
     ###############1D###################
 
     # 100 lottery every lottery diff seed
