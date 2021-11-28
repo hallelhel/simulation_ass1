@@ -6,6 +6,8 @@ from scipy.optimize import fmin
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
+import pandas as pd
+
 # import tensorflow_probability as tfp
 
 
@@ -147,6 +149,8 @@ class RNS_system:
                                     'GS ANT': [], 'LOC ANT': [], 'RA': [], 'RA ANT': [], 'NAV-4000': [],
                                     'VOR ANT': [], 'MB ANT': [], 'ADF ANT': [], 'DME INT': [], 'ANT-42': []}
 
+        self.paramters_for_esti = {'MC_lambada':None, 'MMR_lambada':None, 'GPS ANT_beta':None, 'GPS ANT_eta':None, 'LOC ANT Swi_mu':None, 'LOC ANT Swi_sigma':None, 'GS ANT_beta':None, 'GS ANT_eta':None, 'LOC ANT_beta':None,'LOC ANT_eta':None, 'RA_lambada':None, 'RA ANT_beta':None,'RA ANT_eta':None, 'NAV-4000_lambada':None,
+                                                 'VOR ANT_beta':None, 'VOR ANT_eta':None, 'MB ANT_beta':None,'MB ANT_eta':None, 'ADF ANT_beta':None, 'ADF ANT_eta':None, 'DME INT_lambada':None, 'ANT-42_beta':None, 'ANT-42_eta':None}
     '''
         set seed
     '''
@@ -169,9 +173,10 @@ class RNS_system:
             if self.component_distribution_dict[system]["name"] == "exponential":
                 lambada = self.component_distribution_dict[system]["lambada"]
                 values = self.exp_dis(uniform_values, lambada)
-                self.histograms(values, system, "expo")
+                # self.histograms(values, system, "expo")
                 # estimate parameters
                 esti_lambada = self.fitexp(values)
+                self.paramters_for_esti[f'{system}_lambada'] = 1/esti_lambada
                 self.esti_parameters[system] = esti_lambada
 
 
@@ -179,9 +184,11 @@ class RNS_system:
                 beta = self.component_distribution_dict[system]["beta"]
                 eta = self.component_distribution_dict[system]["eta"]
                 values = self.weibull_dis(uniform_values, beta, eta)
-                self.histograms(values, system, "weibull")
+                # self.histograms(values, system, "weibull")
                 # estimate parameters
                 esti_beta, esti_eta = self.fitweibull(values)
+                self.paramters_for_esti[f'{system}_beta'] = esti_beta
+                self.paramters_for_esti[f'{system}_eta'] = esti_eta
                 self.esti_parameters[system] = esti_beta, esti_eta
 
 
@@ -190,9 +197,11 @@ class RNS_system:
                 mu = self.component_distribution_dict[system]["mu"]
                 sigma = self.component_distribution_dict[system]["sigma"]
                 values = self.log_normal_dis(uniform_values, sigma, mu)
-                self.histograms(values,system,"lognormal")
+                # self.histograms(values,system,"lognormal")
                 #estimate parameters
                 esti_mu, esti_sigma = self.fitlognormal(values)
+                self.paramters_for_esti[f'{system}_mu'] = esti_mu
+                self.paramters_for_esti[f'{system}_sigma'] = esti_sigma
                 self.esti_parameters[system] = esti_mu, esti_sigma
 
 
@@ -445,3 +454,56 @@ class RNS_system:
         _ = plt.hist(array, bins='auto')  # arguments are passed to np.histogram
         plt.title("Histogram-"+sys+" "+dist)
         plt.show()
+
+    def confidence_interval(self):
+        # expectation_100 = pd.DataFrame(columns=['MC', 'MMR', 'RA', 'VHF_NAV', 'DME', 'RNS'])
+        expectation_100 = pd.DataFrame(columns=['MC_lambada', 'MMR_lambada', 'GPS ANT_beta', 'GPS ANT_eta', 'LOC ANT Swi_mu', 'LOC ANT Swi_sigma', 'GS ANT_beta', 'GS ANT_eta', 'LOC ANT_beta','LOC ANT_eta', 'RA_lambada', 'RA ANT_beta','RA ANT_eta', 'NAV-4000_lambada',
+                                                 'VOR ANT_beta', 'VOR ANT_eta', 'MB ANT_beta','MB ANT_eta', 'ADF ANT_beta', 'ADF ANT_eta', 'DME INT_lambada', 'ANT-42_beta', 'ANT-42_eta'])
+        number_of_trials = 100
+        for i in range(number_of_trials):
+            self.seed = self.set_seed()
+            distribution_dict_values = self.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+                                                                  'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
+                                                                  'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
+
+            # curr_values = rns.compare_estimate()
+            curr_values = self.paramters_for_esti
+            # expectation_100.loc[len(expectation_100)] = list(curr_values.values())
+            expectation_100=  expectation_100.append(curr_values, ignore_index=True)
+
+        #  Confidence interval 90%
+        bottom_decile = pd.DataFrame(columns=expectation_100.keys())
+        top_decile = pd.DataFrame(columns=expectation_100.keys())
+        for system in expectation_100.keys():
+            expectation_100[system] = sorted(expectation_100[system])
+            bottom_decile[system] = expectation_100[system].loc[0: 0.05 * number_of_trials - 1]
+            top_decile[system] = expectation_100[system].loc[0.95 * number_of_trials: number_of_trials]
+
+        merged_deciles = pd.concat([bottom_decile, top_decile])
+        # (1) Confidence interval by Empirical experiments
+        confidence_interval_empirical = stats.t.interval(0.9, len(merged_deciles) - 1, loc=np.mean(merged_deciles),
+                                                         scale=stats.sem(merged_deciles))
+
+        # (2) Confidence interval by normal distribution
+        confidence_interval_normal = stats.t.interval(0.9, len(expectation_100) - 1, loc=np.mean(expectation_100),
+                                                      scale=stats.sem(expectation_100))
+        confidence_interval_result = pd.DataFrame(columns=expectation_100.columns)
+
+
+        for i, system in enumerate(expectation_100.columns):
+            [sys_col, param] = system.split("_")
+            real_value = self.component_distribution_dict[sys_col][param]
+
+            print(f"{system} value: {real_value}")
+            print(f"confidence_interval_empirical_results:[ {confidence_interval_empirical[0][i]} : {confidence_interval_empirical[1][i]} ']")
+            # print(f"confidence_interval_empirical_results max: {confidence_interval_empirical[1][i]}")
+            print(f"confidence_interval_results:[ {confidence_interval_normal[0][i]} : {confidence_interval_normal[1][i]} ]")
+            # print(f"confidence_interval_results max: {confidence_interval_normal[1][i]}")
+
+
+            result = [True if confidence_interval_empirical[0][i] <= real_value <= confidence_interval_empirical[1][
+                i] else False,
+                   True if confidence_interval_normal[0][i] <= real_value <= confidence_interval_normal[1][i] else False]
+            confidence_interval_result[system] = result
+
+        return confidence_interval_result
