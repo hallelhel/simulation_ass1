@@ -73,6 +73,8 @@ if __name__ == '__main__':
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'])
     # sub_sys_expectation3 = rns.compare_estimate()
     distribution_estimates = rns.esti_parameters
+
+
     # (3) lottery again now 10,000 with diff seed
     rns.seed = rns.set_seed()
     rns.n = 10000
@@ -102,36 +104,54 @@ if __name__ == '__main__':
     ######## halton 50 #########
     halton_values = sequences.halton(dim=2, n_sample=50)
     halton_values_list = [val[0] for val in halton_values]
-    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+    distribution_dict_values = rns.randoms_array_for_sys_halton(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
                                                           'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'],
                                                        halton_values_list)
-    exp_50 = {}
-    for sys in distribution_dict_values.keys():
-        exp_50[sys] = rns.calculate_expectation(distribution_dict_values[sys])
+    distribution_estimates_50 = rns.esti_parameters
+    # exp_50 = {}
+    # for sys in distribution_dict_values.keys():
+    #     exp_50[sys] = rns.calculate_expectation(distribution_dict_values[sys])
+    data_items = distribution_estimates_50.items()
+    data_list = list(data_items)
+    df_50 = pd.DataFrame(data_list)
+
+    df_50.to_csv('50_.csv')
 
 
     ######## halton 200 #########
     halton_values = sequences.halton(dim=1, n_sample=200)
     halton_values_list = [val[0] for val in halton_values]
-    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+    distribution_dict_values = rns.randoms_array_for_sys_halton(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
                                                           'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'],
                                                          halton_values_list)
-    exp_200 = {}
-    for sys in distribution_dict_values.keys():
-        exp_200[sys] = rns.calculate_expectation(distribution_dict_values[sys])
+    distribution_estimates_200 = rns.esti_parameters
+    # exp_200 = {}
+    # for sys in distribution_dict_values.keys():
+    #     exp_200[sys] = rns.calculate_expectation(distribution_dict_values[sys])
+    data_items = distribution_estimates_200.items()
+    data_list = list(data_items)
+    df_200 = pd.DataFrame(data_list)
+
+    df_200.to_csv('200_.csv')
 
     ######## halton 500 #########
     halton_values = sequences.halton(dim=1, n_sample=500)
     halton_values_list = [val[0] for val in halton_values]
-    distribution_dict_values = rns.randoms_array_for_sys(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
+    distribution_dict_values = rns.randoms_array_for_sys_halton(['MC', 'MMR', 'GPS ANT', 'LOC ANT Swi',
                                                           'GS ANT', 'LOC ANT', 'RA', 'RA ANT', 'NAV-4000',
                                                           'VOR ANT', 'MB ANT', 'ADF ANT', 'DME INT', 'ANT-42'],
                                                          halton_values_list)
+    distribution_estimates_500 = rns.esti_parameters
+    data_items = distribution_estimates_500.items()
+    data_list = list(data_items)
+    df_500 = pd.DataFrame(data_list)
+
+    df_500.to_csv('500_.csv')
     exp_500 = {}
-    for sys in distribution_dict_values.keys():
-        exp_500[sys] = rns.calculate_expectation(distribution_dict_values[sys])
+    # for sys in distribution_dict_values.keys():
+    #     exp_500[sys] = rns.calculate_expectation(distribution_dict_values[sys])
 
     ###############2A###################
 

@@ -455,6 +455,50 @@ class RNS_system:
         plt.title("Histogram-"+sys+" "+dist)
         plt.show()
 
+
+    '''
+        create randoms arrays
+        get: list of numbers for systems 
+        return one list of random values 
+    '''
+
+    def randoms_array_for_sys_halton(self, list_of_distrubition,array_halton):
+        sys_dict_values = {}
+        for system in list_of_distrubition:
+            # uniform_values = self.create_random_array_by_uniform_dist()
+            if self.component_distribution_dict[system]["name"] == "exponential":
+                lambada = self.component_distribution_dict[system]["lambada"]
+                values = self.exp_dis(array_halton, lambada)
+                # self.histograms(values, system, "expo")
+                # estimate parameters
+                esti_lambada = self.fitexp(values)
+                self.esti_parameters[system] = esti_lambada
+
+
+            elif self.component_distribution_dict[system]["name"] == "weibull":
+                beta = self.component_distribution_dict[system]["beta"]
+                eta = self.component_distribution_dict[system]["eta"]
+                values = self.weibull_dis(array_halton, beta, eta)
+                # self.histograms(values, system, "weibull")
+                # estimate parameters
+                esti_beta, esti_eta = self.fitweibull(values)
+                self.esti_parameters[system] = esti_beta, esti_eta
+
+
+
+            elif self.component_distribution_dict[system]["name"] == "log_normal":
+                mu = self.component_distribution_dict[system]["mu"]
+                sigma = self.component_distribution_dict[system]["sigma"]
+                values = self.log_normal_dis(array_halton, sigma, mu)
+                # self.histograms(values,system,"lognormal")
+                #estimate parameters
+                esti_mu, esti_sigma = self.fitlognormal(values)
+                self.esti_parameters[system] = esti_mu, esti_sigma
+
+
+            sys_dict_values[system] = values
+        return sys_dict_values
+
     def confidence_interval(self):
         # expectation_100 = pd.DataFrame(columns=['MC', 'MMR', 'RA', 'VHF_NAV', 'DME', 'RNS'])
         expectation_100 = pd.DataFrame(columns=['MC_lambada', 'MMR_lambada', 'GPS ANT_beta', 'GPS ANT_eta', 'LOC ANT Swi_mu', 'LOC ANT Swi_sigma', 'GS ANT_beta', 'GS ANT_eta', 'LOC ANT_beta','LOC ANT_eta', 'RA_lambada', 'RA ANT_beta','RA ANT_eta', 'NAV-4000_lambada',
@@ -507,3 +551,4 @@ class RNS_system:
             confidence_interval_result[system] = result
 
         return confidence_interval_result
+
